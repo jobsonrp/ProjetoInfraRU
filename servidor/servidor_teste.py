@@ -22,8 +22,6 @@ c = conn.cursor()
 # CODIGO DE CONSULTA AO BANCO
 
 # VERIFICA SE O RFID PASSADO EXISTE NO BANCO
-# SE SIM, RETORNA UMA LISTA CONTENDO NOME E ID DO USUARIO CADASTRADO
-# NAQUELE RFID
 def consulta(num):
     retorno = {}
     retorno["userId"] = 0
@@ -36,7 +34,7 @@ def consulta(num):
 
     if len(r) > 0:
         retorno["userId"] = int(r[0][0])
-        retorno["userName"] = r[0][1] + ""	
+        retorno["userName"] = r[0][1] + ""
 
     return retorno
 
@@ -78,21 +76,19 @@ def on_connect(self, mosq, obj, rc):
 def on_message(mosq, obj, msg):
     print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
-    mensagem = msg.payload
+    '''mensagem = msg.payload
     print type(mensagem)
     mjson = json.loads(mensagem)
-    print mjson['nome']
+    print mjson['nome']'''
 
-    '''cons = consulta(str(msg.payload))
-    
- 
+    cons = consulta(str(msg.payload))
+
     if(cons["userName"] != ""):
-        #retorno = registro(cons)
 	retorno = "%s" % cons
     else:
-    	retorno = "Usuario nao cadastrado."	
+    	retorno = "Usuario nao cadastrado."
     mqttc.publish("retorno", retorno)
-    print(retorno)	'''
+    print(retorno)
 
 # EXECUTADO A CADA PUBLICACAO
 def on_publish(mosq, obj, mid):
@@ -116,7 +112,7 @@ mqttc.on_publish = on_publish
 mqttc.on_subscribe = on_subscribe
 
 # URL DO CLOUDMQTT E DA INSTANCIA AONDE AS FILAS ESTAO
-# A URL DA INSTANCIA E COMPOSTA POR: mqtt://m12.cloudmqtt.com: + PORTA
+# A URL DA INSTANCIA E COMPOSTA POR: mqtt://m10.cloudmqtt.com: + PORTA
 # PORTA PODE SER ENCONTRADO NAS INFORMACOES DA INSTANCIA
 url_str = os.environ.get('m10.cloudmqtt.com','mqtt://m10.cloudmqtt.com:16184')
 url = urlparse.urlparse(url_str)
