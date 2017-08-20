@@ -75,19 +75,20 @@ def on_connect_fila1(self, mosq, obj, rc):
 def on_message_fila1(mosq, obj, msg):
     print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
-    '''mensagem = msg.payload
-    print type(mensagem)
+    #mensagem = '{"userName":"Usuario1","userId":"1"}' #msg.payload
+    mensagem = msg.payload
+    print "tipo da mensagem = ", mensagem
     mjson = json.loads(mensagem)
-    print mjson['nome']'''
+    print "RFID = ", mjson['RFID']
 
-    cons = consulta(str(msg.payload))
+    '''cons = consulta(str(msg.payload))
 
     if(cons["userName"] != ""):
 	retornoNodeMCU = "%s" % cons
     else:
     	retornoNodeMCU = "Usuario nao cadastrado."
     mqttcF1.publish("retornoNodeMCU", retornoNodeMCU)
-    print(retornoNodeMCU)
+    print(retornoNodeMCU)'''
 
 # EXECUTADO A CADA PUBLICACAO
 def on_publish_fila1(mosq, obj, mid):
@@ -108,19 +109,19 @@ def on_connect_fila2(self, mosq, obj, rc):
 def on_message_fila2(mosq, obj, msg):
     print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
-    '''mensagem = msg.payload
-    print type(mensagem)
+    mensagem = msg.payload
+    print "tipo da mensagem = ", mensagem
     mjson = json.loads(mensagem)
-    print mjson['nome']'''
+    print "RFID = ", mjson['RFID']
 
-    cons = consulta(str(msg.payload))
+    '''cons = consulta(str(msg.payload))
 
     if(cons["userName"] != ""):
 	retornoNodeMCU = "%s" % cons
     else:
     	retornoNodeMCU = "Usuario nao cadastrado."
     mqttcF2.publish("retornoAndroid", retornoNodeMCU)
-    print(retornoNodeMCU)
+    print(retornoNodeMCU)'''
 
 # EXECUTADO A CADA PUBLICACAO
 def on_publish_fila2(mosq, obj, mid):
