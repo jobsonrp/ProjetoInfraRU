@@ -125,7 +125,8 @@ def recargaAndroid(cpf,valor):
         
         queryConsultaAndroidRecarga = queries['RECARGA']  % (novoSaldo,cpf)
         cursorBD.execute(queryConsultaAndroidRecarga)
-        retornoQueryRecarga = cursorBD.fetchall()
+        conn.commit()
+	retornoQueryRecarga = cursorBD.fetchall()
                 
         print "novoSaldo === " ,novoSaldo
         case = "sucesso_recargaAndroid"
