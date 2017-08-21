@@ -19,7 +19,9 @@ queries = {}
 queries['nodeSaldo'] = "SELECT saldo FROM Usuario WHERE rfid = '%s'";
 queries['SALDO'] = "SELECT saldo FROM Usuario WHERE cpf = '%s'"
 queries['CADASTRO'] = "INSERT INTO Usuario (rfid, nome, cpf, saldo) VALUES ('%s', '%s', '%s', '%s')"
+#queries['CADASTRO'] = "UPDATE Usuario SET nome = '%s', cpf = '%s', saldo = '%s' WHERE rfid = '%s'"
 queries['RECARGA'] = "UPDATE Usuario SET saldo = '%s' WHERE cpf = '%s'"
+queries['RFID'] = "SELECT tag FROM Rfid WHERE tag = '%s'"
 
 
 #///////////
@@ -86,11 +88,11 @@ def consultaAndroidSaldo(cpf):
     cursorBD.execute(queryConsultaAndroid)
     retornoQuery = cursorBD.fetchall()
 
-    if(len(retornoQuery) > 0):              #RFID valido
+    if(len(retornoQuery) > 0):              #CPF valido
         saldoAtual = float(retornoQuery[0][0])
         print "Saldo === " ,saldoAtual
         case = "sucesso_consultaAndroid"
-    else:                                   #RFID invalido
+    else:                                   #CPF invalido
         case = "erro_usuarioInexistente"
 
     if(case == "sucesso_consultaAndroid"):
@@ -102,13 +104,6 @@ def consultaAndroidSaldo(cpf):
     return retornoJson
 
 
-'''--RECARGA--
-Android --> Server
-{ 'OP': 'RECARGA', 'CPF': '111', 'VALOR': '3.50' } [acessoAndroid]
-
-Server --> Android
-{ 'STATUS': '6' }[retornoAndroid]'''
-
 def recargaAndroid(cpf,valor):
 
     retornoJson = {}
@@ -119,18 +114,17 @@ def recargaAndroid(cpf,valor):
     cursorBD.execute(queryConsultaAndroid)
     retornoQuery = cursorBD.fetchall()
 
-    if(len(retornoQuery) > 0):              #RFID valido
+    if(len(retornoQuery) > 0):              #CPF valido
         saldoAtual = float(retornoQuery[0][0])
         novoSaldo = saldoAtual + float(valor)
         
         queryConsultaAndroidRecarga = queries['RECARGA']  % (novoSaldo,cpf)
         cursorBD.execute(queryConsultaAndroidRecarga)
         conn.commit()
-	retornoQueryRecarga = cursorBD.fetchall()
-                
+        
         print "novoSaldo === " ,novoSaldo
         case = "sucesso_recargaAndroid"
-    else:                                   #RFID invalido
+    else:                                   #CPF invalido
         case = "erro_usuarioInexistente"
 
     if(case == "sucesso_recargaAndroid"):
@@ -140,6 +134,32 @@ def recargaAndroid(cpf,valor):
     print "retorno json ==== " , retornoJson
     return retornoJson
 
+def cadastroAndroid(rfid,nome,cpf):
+    retornoJson = {}
+    saldo = 0.0
+    case = ""
+    
+    queryConsultaAndroid = queries['RFID']  % (rfid)
+    cursorBD.execute(queryConsultaAndroid)
+    retornoQuery = cursorBD.fetchall()
+    
+    if(len(retornoQuery) > 0):              #RFID valido
+        queryConsultaAndroid = queries['CADASTRO']  % (rfid,nome,cpf,saldo)
+        cursorBD.execute(queryConsultaAndroid)
+        conn.commit()
+
+        case = "sucesso_cadastroAndroid"
+    else:                                   #RFID invalido
+        case = "erro_rfidInvalido"
+  
+    if(case == "sucesso_cadastroAndroid"):
+        retornoJson["STATUS"] = 3
+    elif(case == "erro_rfidInvalido"):
+        retornoJson["STATUS"] = 4
+    print "retorno json ==== " , retornoJson
+    return retornoJson
+
+################### FILA NodeMCU ###################################
 def on_connect_filaNode(self, mosq, obj, rc):
     print("rc: " + str(rc))
 
@@ -159,7 +179,8 @@ def on_publish_filaNode(mosq, obj, mid):
 
 def on_subscribe_filaNode(mosq, obj, mid, granted_qos):
     print("Subscribed: " + str(mid) + " " + str(granted_qos))
-
+    
+################### FILA ANDROID ###################################
 def on_connect_filaAndroid(self, mosq, obj, rc):
     print("rc: " + str(rc))
 
@@ -170,15 +191,19 @@ def on_message_filaAndroid(mosq, obj, msg):
     mensagemJson = json.loads(msg.payload)
     op =  mensagemJson['OP']
     cpf =  mensagemJson['CPF']
-    	    
+            
     if (op == 'SALDO'):
-        retornoJsonM = consultaAndroidSaldo(str(cpf))
+        retornoJson = consultaAndroidSaldo(str(cpf))
     elif (op == 'RECARGA'):
         valor = mensagemJson['VALOR']
-	retornoJsonM = recargaAndroid(str(cpf),str(valor))
+        retornoJson = recargaAndroid(str(cpf),str(valor))
+    elif (op == 'CADASTRO'):
+        nome = mensagemJson['NOME']
+        rfid = mensagemJson['RFID']
+        retornoJson = cadastroAndroid(str(rfid),str(nome),str(cpf))    
 
-    mqttcFilaAndroid.publish("retornoAndroid",  json.dumps(retornoJsonM))
-    print("retorno da operacao = ",retornoJsonM)
+    mqttcFilaAndroid.publish("retornoAndroid",  json.dumps(retornoJson))
+    print("retorno da operacao = ",retornoJson)
 
 def on_publish_filaAndroid(mosq, obj, mid):
     print("Publish: " + str(mid))
