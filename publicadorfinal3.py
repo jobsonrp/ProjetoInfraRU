@@ -45,7 +45,7 @@ time.sleep(1)
 
 usuario = {}
 usuario['OP'] = 'RECARGA'
-usuario['CPF'] = '111'
+usuario['CPF'] = '123456'
 usuario['VALOR'] = '4.64'
 
 mqttc.publish('acessoAndroid', json.dumps(usuario))
@@ -54,8 +54,16 @@ time.sleep(1)
 
 usuario = {}
 usuario['OP'] = 'CADASTRO'
-usuario['NOME'] = 'Maria'
-usuario['CPF'] = '654987'
+usuario['NOME'] = 'Joao'
+usuario['CPF'] = '98743'
 usuario['RFID'] = '888'
+
+mqttc.publish('acessoAndroid', json.dumps(usuario))
+
+time.sleep(1)
+
+usuario = {}
+usuario['OP'] = 'SALDO'
+usuario['CPF'] = '123456'
 
 mqttc.publish('acessoAndroid', json.dumps(usuario))
