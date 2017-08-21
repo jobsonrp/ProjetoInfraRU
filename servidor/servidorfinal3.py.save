@@ -16,7 +16,7 @@ conn = pymysql.connect(
 cursorBD = conn.cursor()
 
 queries = {}
-queries['nodeSaldo'] = "SELECT saldo FROM Usuario WHERE rfid = '%s'";
+queries['nodeSaldo'] = "SELECT saldo FROM Usuario WHERE rfid = '%s' ";
 queries['SALDO']     = "SELECT saldo FROM Usuario WHERE cpf = '%s'"
 queries['CADASTRO']  = "INSERT INTO Usuario (rfid, nome, cpf, saldo) VALUES ('%s', '%s', '%s', '%s')"
 queries['RECARGA']   = "UPDATE Usuario SET saldo = '%s' WHERE cpf = '%s'"
@@ -34,7 +34,7 @@ queries['RFID']      = "SELECT tag FROM Rfid WHERE tag = '%s'"
 #///////////
 
 def decrementaSaldo(valor, rfid):
-    queryDesconto = "UPDATE Usuario SET saldo = %.2f WHERE rfid = '%s'" % (valor, rfid)
+    queryDesconto = "UPDATE usuario SET saldo = %.2f WHERE rfid = '%s'" % (valor, rfid)
     cursorBD.execute(queryDesconto)
     conn.commit()
     print(cursorBD._last_executed)
@@ -192,7 +192,7 @@ def on_message_filaNode(mosq, obj, msg):
 
     mensagemJson = json.loads(msg.payload)
     rfid =  mensagemJson['RFID']
-    print "rfid = ==== ",rfid	
+
     retornoJson = consultaNode(str(rfid))
 
     mqttcFilaAndroid.publish("retornoNode", json.dumps(retornoJson))
