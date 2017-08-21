@@ -19,6 +19,8 @@ queries['nodeSaldo'] = "SELECT saldo FROM Usuario WHERE rfid = '%s'";
 queries['SALDO']     = "SELECT saldo FROM Usuario WHERE cpf = '%s'"
 queries['CADASTRO']  = "INSERT INTO Usuario (rfid, nome, cpf, saldo) VALUES ('%s', '%s', '%s', '%s')"
 queries['RECARGA']   = "UPDATE Usuario SET saldo = '%s' WHERE cpf = '%s'"
+queries['CPF']      = "SELECT cpf FROM Usuario WHERE cpf = '%s'"
+queries['CHECK_RFID'] = "SELECT cpf FROM Usuario WHERE rfid = '%s'"
 queries['RFID']      = "SELECT tag FROM Rfid WHERE tag = '%s'"
 
 #///////////
@@ -141,24 +143,39 @@ def cadastroAndroid(rfid,nome,cpf):
     saldo = 0.0
     case = ""
     
-    queryConsultaAndroid = queries['RFID']  % (rfid)
-    cursorBD.execute(queryConsultaAndroid)
-    retornoQuery = cursorBD.fetchall()
+    queryConsultaAndroidCPF = queries['CPF']  % (cpf)
+    cursorBD.execute(queryConsultaAndroidCPF)
+    retornoQueryCPF = cursorBD.fetchall()
     
-    if(len(retornoQuery) > 0):              #RFID valido
-        queryConsultaAndroid = queries['CADASTRO']  % (rfid,nome,cpf,saldo)
+    queryConsultaAndroidRFID = queries['CHECK_RFID']  % (rfid)
+    cursorBD.execute(queryConsultaAndroidRFID)
+    retornoQueryRFID = cursorBD.fetchall()
+    
+    if(len(retornoQueryCPF) > 0):              #CPF ja cadastrado
+        retornoJson["STATUS"] = 7
+        case = "erro_usuarioJaCadastrado"
+    elif (len(retornoQueryRFID) > 0):
+        retornoJson["STATUS"] = 8
+        case = "erro_RfidJaEmUso"
+    else:
+        queryConsultaAndroid = queries['RFID']  % (rfid)
         cursorBD.execute(queryConsultaAndroid)
-        conn.commit()
+        retornoQuery = cursorBD.fetchall()
 
-        case = "sucesso_cadastroAndroid"
-    else:                                   #RFID invalido
-        case = "erro_rfidInvalido"
-  
-    if(case == "sucesso_cadastroAndroid"):
-        retornoJson["STATUS"] = 3
-    elif(case == "erro_rfidInvalido"):
-        retornoJson["STATUS"] = 4
-    print "retorno json ==== " , retornoJson
+        if(len(retornoQuery) > 0):              #RFID valido
+            queryConsultaAndroid = queries['CADASTRO']  % (rfid,nome,cpf,saldo)
+            cursorBD.execute(queryConsultaAndroid)
+            conn.commit()
+    
+            case = "sucesso_cadastroAndroid"
+        else:                                   #RFID invalido
+            case = "erro_rfidInvalido"
+    
+        if(case == "sucesso_cadastroAndroid"):
+            retornoJson["STATUS"] = 3
+        elif(case == "erro_rfidInvalido"):
+            retornoJson["STATUS"] = 4
+
     return retornoJson
 
 #######Node

@@ -140,7 +140,7 @@ def recargaAndroid(cpf,valor):
         retornoJson["STATUS"] = 6
     elif(case == "erro_usuarioInexistente"):
         retornoJson["STATUS"] = 1
-    print "retorno json ==== " , retornoJson
+
     return retornoJson
 
 def cadastroAndroid(rfid,nome,cpf):
