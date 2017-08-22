@@ -15,7 +15,7 @@ conn = pymysql.connect(
 cursorBD = conn.cursor()
 
 queries              = {}
-queries['nodeSaldo'] = "SELECT saldo FROM Usuario WHERE rfid = '%s'";
+queries['nodeSaldo'] = "SELECT saldo FROM Usuario WHERE rfid = '%s' AND cpf <> ''"
 queries['SALDO']     = "SELECT saldo FROM Usuario WHERE cpf = '%s'"
 queries['CADASTRO']  = "INSERT INTO Usuario (rfid, nome, cpf, saldo) VALUES ('%s', '%s', '%s', '%s')"
 queries['RECARGA']   = "UPDATE Usuario SET saldo = '%s' WHERE cpf = '%s'"
